@@ -51,12 +51,12 @@ export default function RequestCard({ request, canApprove = false, onRequestClic
   };
 
   const handleClick = () => {
-    if (canApprove && request.status === 'pending' && onRequestClick) {
+    if (canApprove && onRequestClick) {
       onRequestClick(request);
     }
   };
 
-  const isClickable = canApprove && request.status === 'pending';
+  const isClickable = canApprove;
 
   return (
     <div

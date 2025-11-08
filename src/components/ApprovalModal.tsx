@@ -16,6 +16,7 @@ export default function ApprovalModal({ request, onClose, onUpdate, userRole, on
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState('');
   const isBasicUser = userRole === 'basic';
+  const isApprovedRequest = request.status === 'approved';
 
   const handleApprove = async () => {
     try {
@@ -25,7 +26,7 @@ export default function ApprovalModal({ request, onClose, onUpdate, userRole, on
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      if (isBasicUser && onCreateSession) {
+      if ((isBasicUser && isApprovedRequest) && onCreateSession) {
         onClose();
         onCreateSession(request);
         return;
@@ -117,26 +118,42 @@ export default function ApprovalModal({ request, onClose, onUpdate, userRole, on
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-[#1A2633] mb-2">
-                Rejection Reason (required for rejection)
-              </label>
-              <textarea
-                value={rejectionReason}
-                onChange={(e) => setRejectionReason(e.target.value)}
-                rows={4}
-                className="w-full px-4 py-2 border border-[#AFB6D2]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#27A4F6] focus:border-transparent resize-none"
-                placeholder="Provide a reason if you plan to reject this request..."
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-[#F06429]/10 border border-[#F06429]/20 rounded-lg">
-                <p className="text-sm text-[#F06429]">{error}</p>
+          {!isBasicUser && (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-[#1A2633] mb-2">
+                  Rejection Reason (required for rejection)
+                </label>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-[#AFB6D2]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#27A4F6] focus:border-transparent resize-none"
+                  placeholder="Provide a reason if you plan to reject this request..."
+                />
               </div>
-            )}
-          </div>
+
+              {error && (
+                <div className="p-3 bg-[#F06429]/10 border border-[#F06429]/20 rounded-lg">
+                  <p className="text-sm text-[#F06429]">{error}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {isBasicUser && isApprovedRequest && (
+            <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800">
+                This request has been approved. Click "Create Session" to schedule this session.
+              </p>
+            </div>
+          )}
+
+          {error && isBasicUser && (
+            <div className="p-3 bg-[#F06429]/10 border border-[#F06429]/20 rounded-lg mt-4">
+              <p className="text-sm text-[#F06429]">{error}</p>
+            </div>
+          )}
         </div>
 
         <div className="px-6 py-4 border-t border-[#AFB6D2]/20 flex gap-3">
