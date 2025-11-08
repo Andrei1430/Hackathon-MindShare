@@ -119,14 +119,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    // Clear local session data immediately
+    setSession(null);
+    setUser(null);
+    setProfile(null);
+
+    // Try to sign out from server, but don't wait or fail if it errors
     try {
       await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
-      console.error('Error signing out:', error);
-      // Clear local session data even if server signout fails
-      setSession(null);
-      setUser(null);
-      setProfile(null);
+      // Ignore errors - user is already logged out locally
+      console.log('Server signout failed (user already logged out locally)');
     }
   };
 
